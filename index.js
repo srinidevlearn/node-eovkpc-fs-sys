@@ -31,42 +31,54 @@ const writeData = 'Hello world';
 
 // function definitioons
 function callback(error, data) {
-  if (error) console.error(error);
+  // if (error) console.error(error);
   console.log(typeof data);
   if (typeof data === 'object') {
     console.log('buffer to string');
-    console.log(data.toString());
+    // console.log(data.toString());
   }
   if (typeof data === 'string') {
-    console.log(data);
+    // console.log(data);
   }
 }
-console.log(os.EOL, 'check');
+// console.log(os.EOL, 'check');
 
 // file operations
-let data = lorem.generateParagraphs(1000);
+let data = lorem.generateParagraphs(2);
 let resolvedFilePath = __dirname + process.env.MYPATH + 'dummy.txt';
 resolvedFilePath = path.resolve(resolvedFilePath);
+
+// if (fs.existsSync(resolvedFilePath)) fs.unlink(resolvedFilePath);
 
 // let fsStream = fs.createWriteStream(resolvedFilePath);
 // fsStream.write(data);
 
 //stats behaviour with async operation
 
-fs.writeFile(resolvedFilePath, data, unicode, () => {});
+// fs.writeFile(resolvedFilePath, data, unicode, callback);
+// //stats
+// fs.stat(resolvedFilePath, (err, stats) => {
+//   console.log('async', stats.size);
+// });
 
-//stats
-fs.stat(resolvedFilePath, (err, stats) => {
-  console.dir(stats);
-});
+// //stats behaviour with sync operation
+// fs.writeFileSync(resolvedFilePath, data, unicode, () => {});
 
-//stats behaviour with sync operation
-fs.writeFileSync(resolvedFilePath, data, unicode, () => {});
+// //stats
+// fs.stat(resolvedFilePath, (err, stats) => {
+//   console.log('sync', stats.size);
+// });
 
-//stats
-fs.stat(resolvedFilePath, (err, stats) => {
-  console.dir(stats);
-});
+//stats behaviour with stream operation
+
+// let fsStream = fs.createWriteStream(resolvedFilePath);
+
+// fsStream.write(data);
+// fsStream.fsStream.on('end', () => {
+//   fs.stat(resolvedFilePath, (err, stats) => {
+//     console.log('stats', stats);
+//   });
+// });
 
 // Read a file
 // fs.readFile(resolvedFilePath, callback);
@@ -80,11 +92,40 @@ fs.stat(resolvedFilePath, (err, stats) => {
 //   callback
 // );
 
-// let renameFile = resolvedFilePath.replace(/dummy/, 'sample');
-// fs.rename(resolvedFilePath, renameFile, callback);
+let renameFile = resolvedFilePath.replace(/dummy/, 'sample');
+setTimeout(() => {
+  fs.rename(resolvedFilePath, renameFile, callback);
+}, 10 * 1000);
 
-// setTimeout(() => {
-//   fs.unlink(renameFile, callback);
-// }, 60 * 1000);
+setTimeout(() => {
+  fs.unlink(renameFile, callback);
+}, 60 * 1000);
 
+const appendText = (text) => {
+  fs.open(resolvedFilePath, 'a', 666, (e, id) => {
+    fs.write(id, text + os.EOL, null, 'utf8', () => {
+      fs.close(id, () => {
+        console.log('file is updated');
+      });
+    });
+  });
+};
+
+const writeText = (text) => {
+  fs.open(resolvedFilePath, 'w', 666, (e, id) => {
+    fs.write(id, text + os.EOL, null, 'utf8', () => {
+      fs.close(id, () => {
+        console.log('file is updated');
+      });
+    });
+  });
+};
+
+let count = Array.from({ length: 10 }, (i, ind) => ind);
+for (let itm of count) {
+  writeText('Hello world write' + itm);
+  appendText('Hello world append' + itm);
+}
+// .forEach(() => {
+// });
 // fs.open(renameFile,)
